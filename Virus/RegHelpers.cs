@@ -213,7 +213,7 @@ namespace Virus
             return false;
         }
 
-        public static bool SetAESkey(string toSave)
+        public static bool SetAESkey(string toSave) //base64
         {
             string AppTitle = System.AppDomain.CurrentDomain.FriendlyName.Replace(".exe", "");
             string AppPath = Application.ExecutablePath;
@@ -250,10 +250,11 @@ namespace Virus
             key1.Close();
 
             var x = key2.GetValue("aes");
+            
             if (x != null)
             {
-                key2.Close();
-                return x.ToString();
+                key2.Close(); 
+                return x.ToString(); //gets encrypted key
             }
             return null;
 

