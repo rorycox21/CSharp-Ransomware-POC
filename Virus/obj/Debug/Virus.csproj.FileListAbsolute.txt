@@ -7,3 +7,4 @@ C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csproj.GenerateResource.cac
 C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csproj.CoreCompileInputs.cache
 C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.exe
 C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.pdb
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csprojAssemblyReference.cache

