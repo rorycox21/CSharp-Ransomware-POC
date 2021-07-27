@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Virus", "Virus.csproj", "{C4B37304-93A4-41CF-82E8-C6957DA1C2DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Virus (Github)", "Virus (Github).csproj", "{C4B37304-93A4-41CF-82E8-C6957DA1C2DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
