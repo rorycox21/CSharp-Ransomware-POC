@@ -1,0 +1,20 @@
+C:\Users\Rory Cox\source\repos\Virus\bin\Debug\Virus.exe.config
+C:\Users\Rory Cox\source\repos\Virus\bin\Debug\Virus.exe
+C:\Users\Rory Cox\source\repos\Virus\bin\Debug\Virus.pdb
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.Form2.resources
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.Properties.Resources.resources
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csproj.GenerateResource.cache
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csproj.CoreCompileInputs.cache
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.exe
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.pdb
+C:\Users\Rory Cox\source\repos\Virus\obj\Debug\Virus.csprojAssemblyReference.cache
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\bin\Debug\Virus.exe.config
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\bin\Debug\Virus.exe
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\bin\Debug\Virus.pdb
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.csprojAssemblyReference.cache
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.Form2.resources
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.Properties.Resources.resources
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.csproj.GenerateResource.cache
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.csproj.CoreCompileInputs.cache
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.exe
+C:\Users\Rory Cox\source\repos\CSharp-Ransomware-POC (Github)\Virus\obj\Debug\Virus.pdb
